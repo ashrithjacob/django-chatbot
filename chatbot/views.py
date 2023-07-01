@@ -13,13 +13,15 @@ def test_single_pg(request):
             'age': 26,
             'height': 174
             }
+    l = ['Ashrith', '24', '174']
     if request.method == "POST" and request.FILES['file']:
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             newdoc = Document(document=request.FILES['file'], pub_date=timezone.now())
             newdoc.save()
         pdf_file = get_pdf(request.FILES['file'].read())
-        return HttpResponse(f'{pdf_file.pages[0].extract_text()}')
+        #return HttpResponse(f'{pdf_file.pages[0].extract_text()}')
+        return render(request, 'test.html', {'rows':l})
     else:
         form = UploadFileForm()
     # Load documents for the list page
