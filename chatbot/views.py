@@ -5,14 +5,10 @@ from django.urls import reverse
 from .forms import UploadFileForm
 from .models import Document
 # Imaginary function to handle an uploaded file.
-from .processing import summary, get_pdf
+from .processing import get_summary, get_pdf
 
 
 def test_single_pg(request):
-    dict = {'name':'Ashrith',
-            'age': 26,
-            'height': 174
-            }
     l = ['Ashrith', '24', '174']
     if request.method == "POST" and request.FILES['file']:
         form = UploadFileForm(request.POST, request.FILES)
@@ -30,7 +26,7 @@ def test_single_pg(request):
 
 
 def upload_file(request):
-    total_summary={}
+    total_summary=[]
     if request.method == "POST" and request.FILES['file']:
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -39,9 +35,10 @@ def upload_file(request):
         pdf_file = get_pdf(request.FILES['file'].read())
         page_number = 0
         while page_number < len(pdf_file.pages):
-            total_summary['page_number'] = summary(pdf_file, page_number)
+            page_summary = get_summary(pdf_file, page_number)
+            total_summary.append(page_summary)
             page_number += 1
-        return render(request, 'index.html', total_summary)
+        return render(request, 'index.html', {"total_summary":total_summary})
     else:
         form = UploadFileForm()
     # Load documents for the list page
@@ -53,3 +50,7 @@ def index(request, val):
     return HttpResponse(f"Hello, world. You're at the chatbot index.,{val}")
     #return render(request, 'home.html', {'records':records})
 
+#TODO
+#- make summaries async
+#- add path of file uploaded in s3 (aws)
+#- add css/ bootstrap for styling
