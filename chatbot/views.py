@@ -29,12 +29,14 @@ def upload_file(request):
     total_summary=[]
     if request.method == "POST" and request.FILES['file']:
         form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            newdoc = Document(document=request.FILES['file'], pub_date=timezone.now())
-            newdoc.save()
         pdf_file = get_pdf(request.FILES['file'].read())
+        num_page = len(pdf_file.pages)
+        if form.is_valid():
+            newdoc = Document(document=request.FILES['file'], num_page=num_page, pub_date=timezone.now())
+            newdoc.document_url = newdoc.document.name
+            newdoc.save()
         page_number = 0
-        while page_number < len(pdf_file.pages):
+        while page_number < num_page:
             page_summary = get_summary(pdf_file, page_number)
             total_summary.append(page_summary)
             page_number += 1
